@@ -24,6 +24,7 @@ contract Escrow {
     }
 
     mapping(uint256 => ListingData) public listing;
+    mapping(uint256 => mapping(address => bool)) public approvals;
 
     constructor(
         address _nftAddress,
@@ -90,5 +91,9 @@ contract Escrow {
         onlyInspector
     {
         listing[_tokenId].inspectionPassed = _status;
+    }
+
+    function approveSale(uint256 _tokenId) public {
+        approvals[_tokenId][msg.sender] = true;
     }
 }
