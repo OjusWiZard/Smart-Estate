@@ -41,6 +41,14 @@ contract Escrow {
         _;
     }
 
+    modifier onlyBuyer(uint256 _tokenId) {
+        require(
+            msg.sender == listing[_tokenId].buyer,
+            "Only buyer can call this function."
+        );
+        _;
+    }
+
     function list(
         uint256 _tokenId,
         uint256 _purchasePrice,
