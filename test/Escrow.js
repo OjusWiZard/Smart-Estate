@@ -99,4 +99,45 @@ describe('Escrow', () => {
             expect(await escrow.approvals(1, lender.address)).to.be.true;
         })
     })
+
+    describe('Finalize Sale', async () => {
+        const initialSellerBalance = await ethers.provider.getBalance(seller.address);
+        beforeEach(async () => {
+            let tx = await escrow.connect(buyer).depositEarnest(1, { value: tokens(100) });
+            await tx.wait();
+
+            tx = await escrow.connect(inspector).updateInspectionStatus(1, true);
+            await tx.wait();
+
+            tx = await escrow.connect(buyer).approveSale(1);
+            await tx.wait();
+
+            tx = await escrow.connect(seller).approveSale(1);
+            await tx.wait();
+
+            tx = await escrow.connect(lender).approveSale(1);
+            await tx.wait();
+
+            tx = await escrow.connect(buyer).finalizeSale(1);
+            await tx.wait();
+        })
+        it('Approves the Sale by buyer, seller, and lender', async () => {
+            expect(await escrow.approvals(1, buyer.address)).to.be.true;
+            expect(await escrow.approvals(1, seller.address)).to.be.true;
+            expect(await escrow.approvals(1, lender.address)).to.be.true;
+        })
+
+        it('Updates the inspection status', async () => {
+            const listing = await escrow.listing(1);
+            expect(listing.inspectionPassed).to.be.true;
+        })
+
+        it('Transfers the Real Estate token to the buyer', async () => {
+            expect(await realEstate.ownerOf(1)).to.be.equal(buyer.address);
+        })
+
+        it('Transfer the purchase amount to the seller', async () => {
+            expect(await ethers.provider.getBalance(seller.address)).to.be.equal(initialSellerBalance + 100);
+        })
+    })
 });
