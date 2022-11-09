@@ -21,6 +21,7 @@ contract Escrow {
         uint256 escrowAmount;
         address buyer;
         bool inspectionPassed;
+        bool sold;
     }
 
     mapping(uint256 => ListingData) public listing;
@@ -36,6 +37,11 @@ contract Escrow {
         seller = _seller;
         inspector = _inspector;
         lender = _lender;
+    }
+
+    modifier isNotSold(uint256 _id) {
+        require(!listing[_id].sold, "Listing is already sold");
+        _;
     }
 
     modifier onlySeller() {
@@ -71,6 +77,7 @@ contract Escrow {
             _purchasePrice,
             _escrowAmount,
             buyer,
+            false,
             false
         );
     }
@@ -79,6 +86,7 @@ contract Escrow {
         public
         payable
         onlyBuyer(_tokenId)
+        isNotSold(_tokenId)
     {
         require(
             msg.value >= listing[_tokenId].escrowAmount,
@@ -89,15 +97,16 @@ contract Escrow {
     function updateInspectionStatus(uint256 _tokenId, bool _status)
         public
         onlyInspector
+        isNotSold(_tokenId)
     {
         listing[_tokenId].inspectionPassed = _status;
     }
 
-    function approveSale(uint256 _tokenId) public {
+    function approveSale(uint256 _tokenId) public isNotSold(_tokenId) {
         approvals[_tokenId][msg.sender] = true;
     }
 
-    function finalizeSale(uint256 _tokenId) public {
+    function finalizeSale(uint256 _tokenId) public isNotSold(_tokenId) {
         require(listing[_tokenId].inspectionPassed, "Inspection not passed");
         require(approvals[_tokenId][seller], "Seller not approved");
         require(approvals[_tokenId][lender], "Lender not approved");
@@ -113,5 +122,7 @@ contract Escrow {
         );
 
         seller.transfer(listing[_tokenId].purchasePrice);
+
+        listing[_tokenId].sold = true;
     }
 }

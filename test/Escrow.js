@@ -100,9 +100,11 @@ describe('Escrow', () => {
         })
     })
 
-    describe('Finalize Sale', async () => {
-        const initialSellerBalance = await ethers.provider.getBalance(seller.address);
+    describe('Finalize Sale', () => {
+        let initialSellerBalance;
+
         beforeEach(async () => {
+            initialSellerBalance = await ethers.provider.getBalance(seller.address);
             let tx = await escrow.connect(buyer).depositEarnest(1, { value: tokens(100) });
             await tx.wait();
 
@@ -137,7 +139,12 @@ describe('Escrow', () => {
         })
 
         it('Transfer the purchase amount to the seller', async () => {
-            expect(await ethers.provider.getBalance(seller.address)).to.be.equal(initialSellerBalance + 100);
+            expect(await ethers.provider.getBalance(seller.address)).to.be.greaterThanOrEqual(initialSellerBalance.add(100));
+        })
+
+        it('Mark as sold', async () => {
+            const listing = await escrow.listing(1);
+            expect(listing.sold).to.be.true;
         })
     })
 });
