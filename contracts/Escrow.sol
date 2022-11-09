@@ -20,6 +20,7 @@ contract Escrow {
         uint256 purchasePrice;
         uint256 escrowAmount;
         address buyer;
+        bool inspectionPassed;
     }
 
     mapping(uint256 => ListingData) public listing;
@@ -49,6 +50,14 @@ contract Escrow {
         _;
     }
 
+    modifier onlyInspector() {
+        require(
+            msg.sender == inspector,
+            "Only inspector can call this function."
+        );
+        _;
+    }
+
     function list(
         uint256 _tokenId,
         uint256 _purchasePrice,
@@ -60,7 +69,8 @@ contract Escrow {
             msg.sender,
             _purchasePrice,
             _escrowAmount,
-            buyer
+            buyer,
+            false
         );
     }
 
