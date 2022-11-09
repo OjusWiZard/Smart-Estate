@@ -63,4 +63,15 @@ contract Escrow {
             buyer
         );
     }
+
+    function depositEarnest(uint256 _tokenId)
+        public
+        payable
+        onlyBuyer(_tokenId)
+    {
+        require(
+            msg.value >= listing[_tokenId].escrowAmount,
+            "Not enough funds"
+        );
+    }
 }
