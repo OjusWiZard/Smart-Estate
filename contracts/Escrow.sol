@@ -84,4 +84,11 @@ contract Escrow {
             "Not enough funds"
         );
     }
+
+    function updateInspectionStatus(uint256 _tokenId, bool _status)
+        public
+        onlyInspector
+    {
+        listing[_tokenId].inspectionPassed = _status;
+    }
 }
