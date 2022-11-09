@@ -73,4 +73,13 @@ describe('Escrow', () => {
             expect(await ethers.provider.getBalance(escrow.address)).to.be.equal(tokens(0.1));
         })
     })
+
+    describe('Purchases', () => {
+        it('Updates the inspection status', async () => {
+            const tx = await escrow.connect(inspector).updateInspectionStatus(1, true);
+            await tx.wait();
+            const listing = await escrow.listing(1);
+            expect(listing.inspectionPassed).to.be.true;
+        })
+    })
 });
