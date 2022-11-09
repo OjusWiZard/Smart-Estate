@@ -65,4 +65,12 @@ describe('Escrow', () => {
             expect(listing.buyer).to.be.equal(buyer.address);
         })
     })
+
+    describe('Deposits', () => {
+        it('Updates contract balance', async () => {
+            const tx = await escrow.connect(buyer).depositEarnest(1, { value: tokens(0.1) });
+            await tx.wait();
+            expect(await ethers.provider.getBalance(escrow.address)).to.be.equal(tokens(0.1));
+        })
+    })
 });
