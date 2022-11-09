@@ -82,4 +82,21 @@ describe('Escrow', () => {
             expect(listing.inspectionPassed).to.be.true;
         })
     })
+
+    describe('Approvals', () => {
+        it('Approves the Sale by buyer, seller, and lender', async () => {
+            let tx = await escrow.connect(buyer).approveSale(1);
+            await tx.wait();
+
+            tx = await escrow.connect(seller).approveSale(1);
+            await tx.wait();
+
+            tx = await escrow.connect(lender).approveSale(1);
+            await tx.wait();
+
+            expect(await escrow.approvals(1, buyer.address)).to.be.true;
+            expect(await escrow.approvals(1, seller.address)).to.be.true;
+            expect(await escrow.approvals(1, lender.address)).to.be.true;
+        })
+    })
 });
