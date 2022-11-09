@@ -96,4 +96,22 @@ contract Escrow {
     function approveSale(uint256 _tokenId) public {
         approvals[_tokenId][msg.sender] = true;
     }
+
+    function finalizeSale(uint256 _tokenId) public {
+        require(listing[_tokenId].inspectionPassed, "Inspection not passed");
+        require(approvals[_tokenId][seller], "Seller not approved");
+        require(approvals[_tokenId][lender], "Lender not approved");
+        require(
+            approvals[_tokenId][listing[_tokenId].buyer],
+            "Buyer not approved"
+        );
+
+        IERC721(nftAddress).transferFrom(
+            address(this),
+            listing[_tokenId].buyer,
+            _tokenId
+        );
+
+        seller.transfer(listing[_tokenId].purchasePrice);
+    }
 }
