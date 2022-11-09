@@ -20,10 +20,10 @@ describe('Escrow', () => {
         expect(realEstate.address).to.properAddress;
 
         // mint the first Real Estate token
-        const mintTx = await realEstate
+        let tx = await realEstate
             .connect(seller)
             .mint('ipfs://QmTudSYeM7mz3PkYEWXWqPjomRPHogcMFSq7XAvsvsgAPS');
-        await mintTx.wait();
+        await tx.wait();
 
         // Compile and deploy the Escrow contract
         const Escrow = await ethers.getContractFactory('Escrow');
@@ -36,6 +36,14 @@ describe('Escrow', () => {
         await escrow.deployed();
         expect(escrow.address).to.properAddress;
         expect(await escrow.nftAddress()).to.be.equal(realEstate.address);
+
+        // Approve the Escrow contract to transfer the Real Estate token
+        tx = await realEstate.connect(seller).approve(escrow.address, 1);
+        await tx.wait();
+
+        // List the Real Estate token for sale
+        tx = await escrow.connect(seller).list(1, tokens(100), tokens(0.1), buyer.address);
+        await tx.wait();
     })
 
     describe('Deployment', () => {
@@ -44,6 +52,17 @@ describe('Escrow', () => {
             expect(await escrow.seller()).to.be.equal(seller.address);
             expect(await escrow.inspector()).to.be.equal(inspector.address);
             expect(await escrow.lender()).to.be.equal(lender.address);
+        })
+    })
+
+    describe('Listing', () => {
+        it('Lists the Real Estate token for sale', async () => {
+            expect(await realEstate.ownerOf(1)).to.be.equal(escrow.address);
+            const listing = await escrow.listing(1);
+            expect(listing.seller).to.be.equal(seller.address);
+            expect(listing.purchasePrice).to.be.equal(tokens(100));
+            expect(listing.escrowAmount).to.be.equal(tokens(0.1));
+            expect(listing.buyer).to.be.equal(buyer.address);
         })
     })
 });
