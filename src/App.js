@@ -64,12 +64,22 @@ function App() {
         <div className='cards'>
           {
             homes.map((home, index) => (
-              <Home
-                key={index}
-                home={home}
-                provider={provider}
-                escrow={escrow}
-              />
+              <div className='card'>
+                <div className='card__image'>
+                  <img src={home.image} alt='House' />
+                </div>
+                <div className='card__info'>
+                  <h4>{home.attributes[0].value}</h4>
+                  {
+                    <p>
+                      <strong>{home.attributes[2].value}</strong> {home.attributes[2].trait_type} |
+                      <strong>{home.attributes[3].value}</strong> {home.attributes[3].trait_type} |
+                      <strong>{home.attributes[4].value}</strong> {home.attributes[4].trait_type} |
+                    </p>
+                  }
+                  <p>{home.address}</p>
+                </div>
+              </div>
             ))
           }
         </div>
