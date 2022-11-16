@@ -15,12 +15,25 @@ import config from './config.json';
 
 function App() {
 
+  const [account, setAccount] = useState(null);
+
+  const loadBlockchainData = async () => {
+    window.ethereum.on('accountsChanged', async () => {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      setAccount(accounts[0]);
+    });
+  }
+
+  useEffect(() => {
+    loadBlockchainData();
+  }, []);
+
   return (
     <div>
-
+      <Navigation account={account} setAccount={setAccount} />
       <div className='cards__section'>
 
-        <h3>Welcome to Millow</h3>
+        <h3>Welcome to Smart Estate</h3>
 
       </div>
 
