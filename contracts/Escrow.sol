@@ -125,4 +125,6 @@ contract Escrow {
 
         listing[_tokenId].sold = true;
     }
+
+    receive() external payable {}
 }
